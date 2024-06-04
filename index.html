@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>traversal game tester</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .setting {
+      position: relative;
+      border: 3px solid yellow;
+      height: 10%;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: large;
+      background-color: rgb(224, 225, 225);
+    }
+
+    .setting>.BtnGroup {
+      display: flex;
+      flex-direction: row;
+      margin: 0 10px;
+    }
+
+    .setting>.BtnGroup>#resetBtn {
+      background-color: rgb(228, 55, 55);
+      color: rgba(255, 255, 255, 0.75);
+      padding: 1px 2px;
+      border: 1px soid gray;
+      border-radius: 5px;
+    }
+
+    .setting>.BtnGroup>#showMove {
+      background-color: rgb(137, 251, 147);
+      color: rgba(0, 0, 0, 0.75);
+      padding: 1px 2px;
+      border: 1px soid gray;
+      border-radius: 5px;
+    }
+
+    .setting>.BtnGroup>#inputShowMove {
+      border: 1px soid gray;
+      border-radius: 5px;
+      text-align: center;
+      width: fit-content;
+      margin: 0 5px;
+    }
+
+    .setting>p:nth-child(1) {
+      color: coral;
+      text-shadow: 1px 0px black, -1px 0px black, 0px 1px black, 0px -1px black;
+    }
+
+    .setting>p:nth-child(2) {
+      opacity: 0.75;
+      font-size: small;
+    }
+
+    .currentMove {
+      height: 100%;
+      border: 3px solid gray;
+      position: absolute;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 5px;
+    }
+
+    .link {
+      height: 100%;
+      border: 3px solid gray;
+      position: absolute;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 5px;
+    }
+
+    .main {
+      border: 3px solid red;
+      height: 90%;
+      width: 100vw;
+      display: flex;
+      flex-wrap: wrap;
+
+    }
+
+    .main>div {
+      border: 3px solid blue;
+      /*      height: 33.333%;*/
+      /*      width: 33.333%; */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-size: larger;
+      font-weight: bolder;
+    }
+
+    .toggleStart {
+      background-color: aqua;
+    }
+
+    .toggleMove {
+      background-color: lime;
+    }
+
+    .toggleCheck {
+      background-color: rgb(255, 252, 99) !important;
+    }
+
+    .toggleEnd {
+      background-color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="setting">
+      <div class="link">
+        <a href="traversal1row.html">1 row</a>
+        <a href="traversalMrow.html">multiple row</a>
+      </div>
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum, distinctio nihil rem molestias quis modi
+      </p>
+      <p>open console for detail...</p>
+      <div class="BtnGroup">
+        <button type="button" id="resetBtn"
+          onclick="checkStart();classStart = 1;currentMove.innerText = `play!`;">Reset</button>
+        <input type="number" id="inputShowMove" min="1" value="1" />
+        <button type="button" id="showMove" onclick="showMove();">Show</button>
+      </div>
+      <div class="currentMove">
+        <p id="currentMove">play!</p>
+      </div>
+    </div>
+    <div class="main">
+      <!-- <div>
+      <p>1.1</p>
+    </div> -->
+    </div>
+  </div>
+  <script>
+    // create box
+    let arrBox = [] // matrix box
+    let barisBoxPrompt = 1;
+    let kolomBoxPrompt = 1;
+    //do {
+    //  kolomBoxPrompt = parseInt(prompt("kolom box"))
+    //}
+    //while (kolomBoxPrompt <= 0)
+    for (let i = 1; i <= barisBoxPrompt; i++) {
+      for (let j = 1; j <= kolomBoxPrompt; j++) {
+        let divElement = document.createElement("div")
+        divElement.style.width = `${100 / kolomBoxPrompt}%`
+        divElement.style.height = `${100 / barisBoxPrompt}%`
+        let p1Element = document.createElement("p")
+        p1Element.innerText = `baris${i}`
+        let p2Element = document.createElement("p")
+        p2Element.innerText = `kolom${j}`
+        divElement.appendChild(p1Element)
+        divElement.appendChild(p2Element)
+        arrBox.push(divElement) // push matrix array
+      }
+    }
+    console.log("check box") // check box
+    console.log(arrBox) // check box
+
+    // append box
+    const divMain = document.querySelector(".main")
+    for (let i = 0; i < arrBox.length; i++) {
+      divMain.appendChild(arrBox[i])
+    }
+
+    // random appear start point 
+    let randomStart = Math.floor(Math.random() * arrBox.length)
+    //let randomStart = 0
+    arrBox[randomStart].classList.toggle("toggleStart")
+    console.log(`random start = ${randomStart}`);
+
+    function generateCrossings(arr, index, path = []) {
+      if (arr.length === 0) {
+        console.log(path);
+        checkwayofwin++
+        return;
+      }
+
+      for (let i = 0; i < arr.length; i++) {
+        const nextElement = arr[i];
+        // Jika memiliki kolom yang sama atau baris yang sama, maka lanjutkan
+        const firstElementRow = index[0].split(", ")[0];
+        const nextElementRow = nextElement.split(", ")[0];
+        const firstElementCol = index[0].split(", ")[1];
+        const nextElementCol = nextElement.split(", ")[1];
+        if (firstElementRow === nextElementRow || firstElementCol === nextElementCol) {
+          const newPath = path.concat(nextElement);
+          const newRemaining = arr.slice(0, i).concat(arr.slice(i + 1));
+          generateCrossings(newRemaining, [nextElement], newPath);
+        }
+      }
+    }
+
+    const arr = ["baris 1, kolom 1", "baris 1, kolom 2", "baris 1, kolom 3", "baris 2, kolom 1", "baris 2, kolom 2", "baris 2, kolom 3"];
+    const arr2 = ["baris 1, kolom 2", "baris 1, kolom 3", "baris 2, kolom 1", "baris 2, kolom 2", "baris 2, kolom 3"];
+    const arr22 = ["baris 1, kolom 1", "baris 1, kolom 3", "baris 2, kolom 1", "baris 2, kolom 2", "baris 2, kolom 3"];
+    const arr32x2 = ["baris 1, kolom 2", "baris 2, kolom 1", "baris 2, kolom 2"];
+    const indexarr2 = ["baris 1, kolom 1"];
+    const indexarr22 = ["baris 1, kolom 2"];
+    let checkwayofwin = 0
+    generateCrossings(arr22, indexarr22);
+    console.log(checkwayofwin)
+
+
+  </script>
+</body>
+
+</html>

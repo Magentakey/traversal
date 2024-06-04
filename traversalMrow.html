@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>traversal game</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .setting {
+      position: relative;
+      border: 3px solid yellow;
+      height: 10%;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: large;
+      background-color: rgb(224, 225, 225);
+    }
+
+    .setting>.BtnGroup {
+      display: flex;
+      flex-direction: row;
+      margin: 0 10px;
+    }
+
+    .setting>.BtnGroup>#resetBtn {
+      background-color: rgb(228, 55, 55);
+      color: rgba(255, 255, 255, 0.75);
+      padding: 1px 2px;
+      border: 1px soid gray;
+      border-radius: 5px;
+    }
+
+    .setting>.BtnGroup>#showMove {
+      background-color: rgb(137, 251, 147);
+      color: rgba(0, 0, 0, 0.75);
+      padding: 1px 2px;
+      border: 1px soid gray;
+      border-radius: 5px;
+    }
+
+    .setting>.BtnGroup>#inputShowMove {
+      border: 1px soid gray;
+      border-radius: 5px;
+      text-align: center;
+      width: fit-content;
+      margin: 0 5px;
+    }
+
+    .setting>p:nth-child(1) {
+      color: coral;
+      text-shadow: 1px 0px black, -1px 0px black, 0px 1px black, 0px -1px black;
+    }
+
+    .setting>p:nth-child(2) {
+      opacity: 0.75;
+      font-size: small;
+    }
+
+    .currentMove {
+      height: 100%;
+      border: 3px solid gray;
+      position: absolute;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 5px;
+    }
+
+    .main {
+      border: 3px solid red;
+      height: 90%;
+      width: 100vw;
+      display: flex;
+      flex-wrap: wrap;
+
+    }
+
+    .main>div {
+      border: 3px solid blue;
+      /*      height: 33.333%;*/
+      /*      width: 33.333%; */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-size: larger;
+      font-weight: bolder;
+    }
+
+    .toggleStart {
+      background-color: aqua;
+    }
+
+    .toggleMove {
+      background-color: lime;
+    }
+
+    .toggleCheck {
+      background-color: rgb(255, 252, 99) !important;
+    }
+
+    .toggleEnd {
+      background-color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="setting">
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum, distinctio nihil rem molestias quis modi
+      </p>
+      <p>open console for detail...</p>
+      <div class="BtnGroup">
+        <button type="button" id="resetBtn"
+          onclick="checkStart();classStart = 1;currentMove.innerText = `play!`;">Reset</button>
+        <input type="number" id="inputShowMove" min="1" value="1" />
+        <button type="button" id="showMove" onclick="showMove();">Show</button>
+      </div>
+      <div class="currentMove">
+        <p id="currentMove">play!</p>
+      </div>
+    </div>
+    <div class="main">
+      <!-- <div>
+      <p>1.1</p>
+    </div> -->
+    </div>
+  </div>
+  <script>
+    let currentMove = document.querySelector("#currentMove");
+    let arrListPath = [];
+
+    // create box
+    let arrBox = [] // matrix box
+    let barisBoxPrompt = 1;
+    let kolomBoxPrompt = 1;
+    let confirmKolomBoxBesar = true;
+    do {
+      confirmKolomBoxBesar = true;
+      barisBoxPrompt = parseInt(prompt("baris box"))
+      kolomBoxPrompt = parseInt(prompt("kolom box"))
+
+      if (kolomBoxPrompt <= 0 || barisBoxPrompt <= 0) {
+        alert("angka positif!");
+      } else if (kolomBoxPrompt >= 4 || barisBoxPrompt >= 4) {
+        confirmKolomBoxBesar = confirm("pengecekan angka akan sangat besar, yakin untuk meneruskan");
+      }
+    }
+    while (kolomBoxPrompt <= 0 || barisBoxPrompt <= 0 || !confirmKolomBoxBesar)
+    for (let i = 1; i <= barisBoxPrompt; i++) {
+      for (let j = 1; j <= kolomBoxPrompt; j++) {
+        let divElement = document.createElement("div")
+        divElement.style.width = `${100 / kolomBoxPrompt}%`
+        divElement.style.height = `${100 / barisBoxPrompt}%`
+        let p1Element = document.createElement("p")
+        p1Element.innerText = `baris${i}`
+        let p2Element = document.createElement("p")
+        p2Element.innerText = `kolom${j}`
+        divElement.appendChild(p1Element)
+        divElement.appendChild(p2Element)
+        arrBox.push(divElement) // push matrix array
+      }
+    }
+    console.log("check box") // check box
+    console.log(arrBox) // check box
+
+    // append box
+    const divMain = document.querySelector(".main")
+    for (let i = 0; i < arrBox.length; i++) {
+      divMain.appendChild(arrBox[i])
+    }
+
+    // random appear start point 
+    let randomStart = Math.floor(Math.random() * arrBox.length)
+    //let randomStart = 0
+    arrBox[randomStart].classList.toggle("toggleStart")
+    console.log(`random start = ${randomStart}`);
+
+    // check togglestart exist
+    let classStart = 0;
+    checkStart()
+    function checkStart() {
+      if (arrBox[randomStart].classList.length == 1) {
+        classStart = 1;
+      } else {
+        classStart = 0
+        for (let i = 0; i < arrBox.length; i++) {
+          if (arrBox[i].classList.contains("toggleMove")) {
+            if (arrBox[i].classList.contains("toggleEnd")) {
+              arrBox[i].classList.toggle("toggleEnd")
+              arrBox[i].classList.toggle("toggleMove")
+            } else {
+              arrBox[i].classList.toggle("toggleMove")
+            }
+          }
+        }
+        checkWay(arrBox[randomStart])
+        mainElement[0].addEventListener("click", bodyClickFunction);
+      }
+    }
+
+    // check win
+    function checkWin(e) {
+      let checkwin = 0
+      for (let i = 0; i < arrBox.length; i++) {
+        if (arrBox[i].classList.contains("toggleMove")) {
+          checkwin++
+        }
+      }
+      if (checkwin == arrBox.length) {
+        e.classList.toggle("toggleEnd");
+        mainElement[0].removeEventListener("click", bodyClickFunction);
+        const setCheckWayWin = document.querySelector(".setting>p");
+        setCheckWayWin.innerText = `congrats! you win the game!`;
+      }
+    }
+
+    // onclick event
+    let mainElement = document.getElementsByClassName("main");
+    mainElement[0].addEventListener("click", bodyClickFunction);
+    function bodyClickFunction(e) {
+      if (classStart) {
+        if (!e.target.classList.contains("main") && e.target.tagName == "DIV" && e.target.classList.contains("toggleStart")) {
+          currentMove.innerText = `${e.target.firstChild.innerText}, ${e.target.lastChild.innerText}`;
+          //console.log(currentMove.innerText.split(", "));
+          console.log(e.target);
+          e.target.classList.toggle("toggleMove");
+          checkWay(e.target)
+          classStart = 0
+          checkWin(e.target)
+        }
+      }
+      else {
+        if (!e.target.classList.contains("main") && e.target.tagName == "DIV" && e.target.classList.contains("toggleStart")) {
+          currentMove.innerText = `play!`;
+          console.log(e.target);
+          checkStart();
+          classStart = 1
+        } else if (!e.target.classList.contains("main") && e.target.tagName == "DIV") {
+          if (e.target.classList.contains("toggleMove")) {
+            currentMove.innerText = `play!`;
+            console.log(e.target);
+            checkStart();
+            classStart = 1
+          } else {
+            if (e.target.firstChild.innerText === currentMove.innerText.split(", ")[0] || e.target.lastChild.innerText === currentMove.innerText.split(", ")[1]) {
+              currentMove.innerText = `${e.target.firstChild.innerText}, ${e.target.lastChild.innerText}`;
+              console.log(e.target);
+              e.target.classList.toggle("toggleMove");
+              checkWay(e.target)
+              checkWin(e.target)
+            } else {
+              alert("satu garis lurus!");
+            }
+          }
+        }
+      }
+    }
+
+
+
+    // check way win
+    let checkWayWin;
+    checkWay(arrBox[randomStart]);
+    function checkWay(index) {
+      let kolomBoxPromptA = kolomBoxPrompt
+      let barisBoxPromptA = barisBoxPrompt
+      let boxBaris = index.firstChild
+      let boxBarisNum = parseInt(boxBaris.innerText.replace(/[^\d]/g, ""))
+      let boxKolom = index.lastChild
+      let boxKolomNum = parseInt(boxKolom.innerText.replace(/[^\d]/g, ""))
+      // checking sisa box horizontal
+      let arrBoxMoveHorizontal = new Set([index]); // agar tidak duplikat
+      for (let i = 0; i < arrBox.length; i++) {
+        if (!arrBox[i].classList.contains("toggleMove")) {
+          arrBoxMoveHorizontal.add(arrBox[i]);
+        }
+      }
+      console.log("===");
+      console.log(arrBoxMoveHorizontal);
+
+      let newArr = [...arrBoxMoveHorizontal]
+      let startIndex = index
+
+      arrListPath = [];
+      checkWayWin = 0;
+      newArr.splice(newArr.indexOf(index), 1)
+      generatePermutations(newArr, startIndex, index)
+
+      console.log(`${checkWayWin} way of win`)
+      console.log(arrListPath)
+      const setCheckWayWin = document.querySelector(".setting>p");
+      if (checkWayWin === 0) {
+        setCheckWayWin.innerText = `you lose!`;
+        mainElement[0].removeEventListener("click", bodyClickFunction);
+      } else {
+        setCheckWayWin.innerText = `there is ${checkWayWin} way of win!`;
+      }
+    }
+
+    // algorithm permutasi
+    function generatePermutations(arr, startIndex, index, path = []) {
+      if (arr.length === 0) {
+        path.unshift(startIndex);
+        console.log(path);
+        arrListPath.push(path)
+        checkWayWin++;
+        return;
+      }
+
+      for (let i = 0; i < arr.length; i++) {
+        const nextElement = arr[i];
+        // Jika memiliki kolom yang sama atau baris yang sama, maka lanjutkan
+        const firstElementRow = index.firstChild.innerText;
+        const nextElementRow = nextElement.firstChild.innerText;
+        const firstElementCol = index.lastChild.innerText;
+        const nextElementCol = nextElement.lastChild.innerText;
+        if (firstElementRow === nextElementRow || firstElementCol === nextElementCol) {
+          const nextPath = path.concat(nextElement);
+          const remainingElements = arr.slice(0, i).concat(arr.slice(i + 1));
+          generatePermutations(remainingElements, startIndex, nextElement, nextPath);
+        }
+      }
+    }
+
+    function showMove() {
+      mainElement[0].removeEventListener("click", bodyClickFunction);// matikan click function sementara
+
+      let inputMove = parseInt(document.querySelector("#inputShowMove").value) - 1; // index list path
+      let inputMoveIncrement = document.querySelector("#inputShowMove"); // increment inputmove field
+
+      // index list path kemungkinannya
+      if ((inputMove + 1) <= 0) {
+        alert("positif!");
+      } else if ((inputMove + 1) > checkWayWin) {
+        alert(`hanya ada ${checkWayWin} kemungkinan`);
+        inputMoveIncrement.value = 1;
+      } else {
+        const myInterval = setInterval(runMyShowMove, 250); // interval
+
+        let arrListPathNow = arrListPath[inputMove]
+        let arrListPathNowLength = arrListPathNow.length;
+        let arrListPathNowLengthCount = 0;
+        function runMyShowMove() {
+          arrListPathNow[arrListPathNowLengthCount].classList.toggle("toggleCheck");
+          if (arrListPathNowLengthCount == (arrListPathNowLength - 1)) {
+            clearInterval(myInterval)
+
+            setTimeout(() => {
+              for (let i = 0; i < arrListPathNowLength; i++) {
+                if (arrListPathNow[i].classList.contains("toggleCheck")) {
+                  arrListPathNow[i].classList.toggle("toggleCheck");
+                }
+              }
+              mainElement[0].addEventListener("click", bodyClickFunction); // aktifkan kembali click function ketika selesai
+            }, 1000)
+          } else {
+            arrListPathNowLengthCount++;
+          }
+        }
+
+        inputMoveIncrement = document.querySelector("#inputShowMove");
+        inputMoveIncrement.value = parseInt(inputMoveIncrement.value) + 1;
+      }
+    }
+  </script>
+</body>
+
+</html>
